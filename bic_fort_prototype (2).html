@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BIC FORT - Prototype IA</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+body { font-family: 'Roboto', sans-serif; background: linear-gradient(135deg, #e0f2fe, #fef9c3); margin:0; padding:0; color:#1e293b; }
+header { background:#1d4ed8; color:white; padding:2rem; text-align:center; position:relative; }
+header h1 { margin:0; font-size:2.5rem; }
+header p { margin:0.3rem 0 0; font-size:1.2rem; font-style:italic; }
+#logo { position:absolute; top:1rem; left:1rem; width:80px; height:80px; border-radius:1rem; background:white; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#1d4ed8; font-size:1rem; box-shadow:0 4px 10px rgba(0,0,0,0.2); }
+main { max-width:600px; margin:-40px auto 2rem; background:white; border-radius:1rem; padding:2rem; box-shadow:0 8px 20px rgba(0,0,0,0.15); }
+form label { display:block; margin:1rem 0 0.3rem; font-weight:700; }
+form input { width:100%; padding:0.8rem; border-radius:0.5rem; border:1px solid #cbd5e1; font-size:1rem; transition:border 0.3s; }
+form input:focus { border:2px solid #1d4ed8; outline:none; }
+form button { margin-top:1.5rem; width:100%; padding:1rem; background:#1d4ed8; color:white; border:none; border-radius:0.5rem; font-size:1.1rem; cursor:pointer; }
+form button:hover { background:#2563eb; }
+#chatbox { display:none; margin-top:2rem; }
+.message { margin:0.5rem 0; padding:0.8rem 1rem; border-radius:1rem; max-width:80%; word-wrap:break-word; }
+.bot { background:#e0e7ff; align-self:flex-start; }
+.user { background:#d1fae5; align-self:flex-end; text-align:right; }
+#chat-area { display:flex; flex-direction:column; gap:0.5rem; border:1px solid #e2e8f0; border-radius:0.5rem; padding:1rem; height:300px; overflow-y:auto; margin-bottom:1rem; background:#f1f5f9; }
+#user-input { display:flex; gap:0.5rem; }
+#user-input input { flex:1; padding:0.8rem; border-radius:0.5rem; border:1px solid #cbd5e1; }
+#user-input button { padding:0.8rem 1rem; border:none; border-radius:0.5rem; background:#1d4ed8; color:white; cursor:pointer; }
+#user-input button:hover { background:#2563eb; }
+.suggestions { display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:1rem; }
+.suggestions button { padding:0.5rem 1rem; border:none; border-radius:0.5rem; background:#60a5fa; color:white; cursor:pointer; font-size:0.9rem; }
+.suggestions button:hover { background:#3b82f6; }
+</style>
+</head>
+<body>
+<header>
+<div id="logo">BIC FORT</div>
+<h1>Bienvenue sur BIC FORT</h1>
+<p>L’IA au service des entreprises ivoiriennes</p>
+</header>
+<main>
+<div id="signup">
+<h2>Inscription</h2>
+<form id="signup-form">
+<label for="name">Nom et prénom</label>
+<input type="text" id="name" required />
+<label for="company">Nom de l’entreprise</label>
+<input type="text" id="company" required />
+<button type="submit">Commencer avec BIC FORT</button>
+</form>
+</div>
+<div id="chatbox">
+<h2>Assistant CNAM</h2>
+<div id="chat-area"></div>
+<div class="suggestions">
+<button onclick="sendPredefined('Comment m\'enrôler à la CNAM ?')">Enrôlement</button>
+<button onclick="sendPredefined('Montant des cotisations ?')">Cotisations</button>
+<button onclick="sendPredefined('Quels sont les centres CNAM ?')">Centres CNAM</button>
+<button onclick="sendPredefined('Comment vérifier mon statut ?')">Statut</button>
+<button onclick="sendPredefined('Comment bien fonctionner dans mon poste à CNAM ?')">Conseils poste</button>
+</div>
+<div id="user-input">
+<input type="text" id="message" placeholder="Posez votre question..." />
+<button onclick="sendMessage()">Envoyer</button>
+</div>
+</div>
+</main>
+<script>
+const form = document.getElementById('signup-form');
+const signupDiv = document.getElementById('signup');
+const chatbox = document.getElementById('chatbox');
+const chatArea = document.getElementById('chat-area');
+let userName = '';
+let company = '';
+const responses = {
+'enrôlement':'Pour vous enrôler à la CNAM, rendez-vous dans un centre agréé avec pièce d’identité.',
+'cotisations':'Les cotisations sont de 1000 FCFA par mois pour les actifs et 1000 FCFA par trimestre pour les étudiants.',
+'centre':'Les centres CNAM agréés sont à Abidjan, Yamoussoukro, Bouaké et toutes les capitales régionales.',
+'statut':'Vous pouvez vérifier votre statut via le portail CNAM ou un centre agréé.',
+'poste':'Pour bien fonctionner dans votre poste à la CNAM, suivez les procédures internes, formations et consultez les guides de service.',
+'autres':'Je peux vous aider sur l’enrôlement, cotisations, centres CNAM, statut ou conseils pour votre poste.'
+};
+form.addEventListener('submit', e=>{
+e.preventDefault();
+userName=document.getElementById('name').value;
+company=document.getElementById('company').value;
+signupDiv.style.display='none';
+chatbox.style.display='block';
+addBotMessage(`Bonjour ${userName} de ${company}, ravi de vous retrouver 👋`);
+addBotMessage('Que voulez-vous savoir aujourd’hui sur la CNAM ?');
+});
+function addBotMessage(text){const msg=document.createElement('div');msg.classList.add('message','bot');msg.innerText=text;chatArea.appendChild(msg);chatArea.scrollTop=chatArea.scrollHeight;}
+function addUserMessage(text){const msg=document.createElement('div');msg.classList.add('message','user');msg.innerText=text;chatArea.appendChild(msg);chatArea.scrollTop=chatArea.scrollHeight;}
+function sendMessage(){const input=document.getElementById('message');const text=input.value.trim();if(!text)return;addUserMessage(text);input.value='';setTimeout(()=>respond(text),500);}
+function sendPredefined(question){addUserMessage(question);setTimeout(()=>respond(question),500);}
+function respond(text){text=text.toLowerCase();let answered=false;for(let key in responses){if(text.includes(key)){addBotMessage(responses[key]);answered=true;break;}}if(!answered)addBotMessage('Je n’ai pas compris, mais je peux vous aider sur : enrôlement, cotisations, centres CNAM, statut ou conseils pour votre poste.');}
+</script>
+</body>
+</html>
